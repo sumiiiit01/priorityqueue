@@ -1,0 +1,291 @@
+Q1. Given an integer array, find the kth largest element using priority queue.
+
+input1:arr[] = {1,2,3,5,2,6,9} k = 3
+output1:5
+input2:arr[] = {1,7,8,5,2,6,9} k = 6
+output2:2
+
+
+Solution :
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+ 
+class Main{
+    // Function to find the k'th largest element in an array using max-heap
+    public static int findKthLargest(List<Integer> ints, int k){
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+                                    // or pass `Comparator.reverseOrder()`
+        pq.addAll(ints);
+ 
+        // pop from max-heap exactly `k-1` times
+        while (--k > 0) {
+            pq.poll();
+        }
+        return pq.peek();
+    }
+ 
+    public static void main(String[] args){
+        List<Integer> ints = Arrays.asList(7, 4, 6, 3, 9, 1);
+        int k = 2;
+        System.out.println("k'th largest array element is " + findKthLargest(ints, k));
+    }
+}
+output:
+
+k'th largest array element is 7
+
+
+Approach :
+
+ METHOD1:Using maxheap,
+> Insert all elements into a maxheap.
+> Remove first (k-1) elements
+> The element at the top of the heap is the kth largest element.
+
+
+Time complexity : O(nlogn) where n is the number of elements in the array.
+Space complexity : O(n) because n elements are inserted in the heap
+
+
+METHOD 2 Using minheap,
+> Insert first k elements into a minheap
+> for remaining (n-k) elements if the ith element is greater than the top element of the queue, remove it
+from the top and insert this current element into the queue
+> Since the element at the top will never be considered in k largest elements until another element greater
+than this peek element is outside the queue
+> If the ith element is lesser then do nothing and move to the next iteration
+> repeat this process until all the elements are traversed
+>This way the kth largest element will be at the top of the queue in the end.
+
+Time complexity : O(nlogk)
+Space complexity : O(k) because in the worst case queue will be only holding k elements.
+
+
+code:
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+ 
+class Main{
+    public static int findKthLargest(List<Integer> ints, int k){
+        // create a min-heap using the `PriorityQueue` class and insert the first `k` array elements into the heap
+        PriorityQueue<Integer> pq = new PriorityQueue<>(ints.subList(0, k));
+ 
+        for (int i = k; i < ints.size(); i++){
+            // if the current element is more than the root of the heap
+            if (ints.get(i) > pq.peek()){
+                // replace root with the current element
+                pq.poll();
+                pq.add(ints.get(i));
+            }
+        }
+        return pq.peek();
+    }
+
+    public static void main(String[] args){
+        List<Integer> ints = Arrays.asList(7, 4, 6, 3, 9, 1);
+        int k = 2;
+ 
+        System.out.println("k'th largest array element is " + findKthLargest(ints, k));
+    }
+}
+
+output:
+k'th largest array element is 7
+
+
+Q2. Given n ropes of different lengths, connect them into a single rope with minimum cost. Assume that the
+cost to connect two ropes is the same as the sum of their lengths.
+
+For example,
+Input: [5, 4, 2, 8]
+output:The minimum cost is 36
+[5, 4, 2, 8] –> First, connect ropes of lengths 4 and 2 that will cost 6.
+[5, 6, 8] –> Next, connect ropes of lengths 5 and 6 that will cost 11.
+[11, 8] –> Finally, connect the remaining two ropes that will cost 19.
+Therefore, the total cost for connecting all ropes is 6 + 11 + 19 = 36.
+
+
+solution:
+
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+ 
+class Main{
+    // Function to calculate the minimum cost to join `n` ropes into a single rope
+    public static int findMinCost(List<Integer> prices)
+    {
+        // create a min-heap using `PriorityQueue` class from elements of the list
+        PriorityQueue<Integer> pq = new PriorityQueue<>(prices);
+ 
+        // keep track of the minimum cost so far
+        int cost = 0;
+ 
+        // repeat till heap size is reduced to one
+        while (pq.size() > 1){
+            // Extract the top two elements from the min-heap
+            int x = pq.poll();
+            int y = pq.poll();
+ 
+            // calculate the cost of the extracted values
+            int sum = x + y;
+ 
+            // insert the cost back to the min-heap
+            pq.add(sum);
+ 
+            // update the minimum cost
+            cost += sum;
+        }
+        return cost;
+    }
+ 
+    public static void main(String[] args){
+        List<Integer> prices = Arrays.asList(5, 4, 2, 8);
+        System.out.println("The minimum cost is " + findMinCost(prices));
+    }
+}
+
+output:
+
+the minimun cost is 36
+
+
+
+Approach :
+> The idea is to connect the two lowest-cost ropes first. The resultant rope has a cost equal to the sum of the
+connected ropes
+> Repeat the process (with resultant rope included) until we are left with a single rope
+> At each iteration of the loop, we will be left with one less rope and the optimal cost is added to the total
+cost.
+> The final cost for connecting n ropes will be minimal among all possible combinations
+> A priority queue implemented using min-heap is best suited for this problem.
+
+
+
+Q3. Given an array of string ‘words’ and an integer k, return the k most frequent strings. Return the answer
+sorted by the frequency from highest to lowest. Sort the words with the same frequency by their
+lexicographical order.
+
+
+Example 1:
+
+input:words = ["i","love","leetcode","i","love","coding"], k = 2
+output:["i","love"]
+
+
+Explanation: "i" and "love" are the two most frequent words.
+Note that "i" comes before "love" due to a lower alphabetical order.
+
+Example 2:
+
+
+input:words = ["the","day","is","sunny","the","the","the","sunny","is","is"], k = 4
+output:["the","is","sunny","day"]
+
+Explanation: the", "is", "sunny" and "day" are the four most frequent words, with the number of occurrences
+being 4, 3, 2 and 1 respectively.
+
+
+Solution :
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.*;
+ 
+class Main{
+   public static void topKFrequent(String[] words, int k) {
+        
+        List<String> result = new ArrayList<String>();
+        Map<String, Integer> map = new HashMap<>();
+        
+        for(int i=0; i<words.length; i++){
+            if(map.containsKey(words[i]))
+                map.put(words[i], map.get(words[i])+1);
+            else
+                map.put(words[i], 1);
+        }
+        
+        PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>(
+                 (a,b) -> a.getValue()==b.getValue() ? b.getKey().compareTo(a.getKey()) : a.getValue()-b.getValue()
+        );
+        
+        for(Map.Entry<String, Integer> entry: map.entrySet()) {
+            pq.offer(entry);
+            if(pq.size()>k)
+                pq.poll();
+        }
+
+        while(!pq.isEmpty()) result.add(0, pq.poll().getKey());
+        
+        for(String res : result){
+            System.out.print(res + "  ");
+        }
+    }
+    public static void main(String[] args){
+        String[] input = { "PW" , "PWskills" , "PhysicsWallah" , "PW" , "PhysicsWallah" , "PWJAVA" , "Code" };
+        topKFrequent(input , 3);
+    }
+}
+
+output:
+PW PhysicWallah Code
+
+Approach :
+> The idea is to keep a count of each word in a HashMap and then insert in a Priority Queue
+>While inserting in pq, if the count of two words is the same then insert them based on string comparison of
+the keys.
+
+
+Q4. You are given an array of integer stones where stones[i] is the weight of the ith stone. We are playing a
+game with the stones. On each turn, we choose the heaviest two stones and smash them together. Suppose
+the heaviest two stones have weights x and y with x <= y. The result of this smash is:
+If x == y, both stones are destroyed, and
+If x != y, the stone of weight x is destroyed, and the stone of weight y has new weight y - x.
+At the end of the game, there is at most one stone left.
+
+Return the weight of the last remaining stone. If there are no stones left, return 0.
+
+Example 1:
+input:stones = [2,7,4,1,8,1]
+output:1
+Explanation:
+
+We combine 7 and 8 to get 1 so the array converts to [2,4,1,1,1] then,
+we combine 2 and 4 to get 2 so the array converts to [2,1,1,1] then,
+we combine 2 and 1 to get 1 so the array converts to [1,1,1] then,
+we combine 1 and 1 to get 0 so the array converts to [1] then that's the value of the last stone.
+Example 2:
+input:stones = [1]
+output:1
+
+Solution :
+
+import java.util.*;
+ 
+class Main{
+   public static int lastStoneWeight(int[] A) {
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b)-> b - a);
+        for (int a : A)
+            pq.offer(a);
+        while (pq.size() > 1)
+            pq.offer(pq.poll() - pq.poll());
+        return pq.poll();
+    }
+    public static void main(String[] args){
+        int[] input = {2,7,4,1,8,1};
+        System.out.println("The desired output is : " + lastStoneWeight(input));
+    }
+}
+
+output:
+The desired output is :1
+
+Approach :
+> Put all elements into a priority queue
+> Pop out the two biggest, push back the difference,until there are no more two elements left.
